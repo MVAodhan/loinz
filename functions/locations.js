@@ -16,36 +16,28 @@ exports.handler = async function (event, context) {
     `https://www.health.govt.nz/our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-health-advice-public/contact-tracing-covid-19/covid-19-contact-tracing-locations-interest`
   );
 
-  await page.exposeFunction("mapLocations", async (htmlCollection) => {
-    htmlCollection.forEach((row, i) => {
-      let locationsOfIntrest = [];
-      let locationName = row[0].innerText;
-      let locationDetails = {
-        place: locationName,
-      };
-
-      locationsOfIntrest = [...locationsOfIntrest, locationDetails];
-    });
-    return locationsOfIntrest;
-  });
-
   const locations = await page.evaluate(async () => {
-    const tdiv = document.querySelector(".table-responsive");
-    const locationsTable = tdiv.children[0].tBodies[0];
-    const htmlCollection = locationsTable.children;
+    let tdiv = document.querySelector(".table-responsive");
+    let locationsTable = tdiv.children[0].tBodies[0];
+    let htmlCollection = locationsTable.children;
+    let rowsArray = Array.from(htmlCollection);
 
-    const row = htmlCollection.item(0);
-    const rowPlaceCell = row.children[0];
-    const rowPlaceCellText = rowPlaceCell.innerText;
+    let mappedLocations = rowsArray.map((row) => {
+      let name = rowsArray[0].childNodes[1].innerText;
+      let address = row.childNodes[3].innerText;
+      let day = row.childNodes[5].innerText;
+      let times = row.childNodes[7].innerText;
+      let action = row.childNodes[9].innerText;
+      let updatedAt = row.childNodes[11].innerText;
 
-    return rowPlaceCellText;
+      return { name, address, day, times, action, updatedAt };
+    });
+
+    return mappedLocations;
   });
   await browser.close();
   return {
     statusCode: 200,
-    body: JSON.stringify({
-      status: "Ok",
-      locations,
-    }),
+    body: JSON.stringify(locations),
   };
 };
