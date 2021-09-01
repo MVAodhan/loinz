@@ -23,7 +23,7 @@ exports.handler = async function (event, context) {
     let rowsArray = Array.from(htmlCollection);
 
     let mappedLocations = rowsArray.map((row) => {
-      let name = rowsArray[0].childNodes[1].innerText;
+      let name = row.childNodes[1].innerText;
       let address = row.childNodes[3].innerText;
       let day = row.childNodes[5].innerText;
       let times = row.childNodes[7].innerText;
@@ -39,5 +39,10 @@ exports.handler = async function (event, context) {
   return {
     statusCode: 200,
     body: JSON.stringify(locations),
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "GET",
+    },
   };
 };
